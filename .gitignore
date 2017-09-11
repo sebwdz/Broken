@@ -101,3 +101,5 @@ ENV/
 
 data/
 models/
+
+.idea

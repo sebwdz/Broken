@@ -90,7 +90,7 @@ with graph.as_default():
     merged = tf.summary.merge_all()
 
 print("initializing session ...")
-sess = lib.session.Session("bounding_box", graph=graph)
+sess = lib.session.Session("models/bounding_box", graph=graph)
 sess.init()
 ii = 0
 

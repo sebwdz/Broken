@@ -85,7 +85,7 @@ plt.ion()
 fig, ax = plt.subplots(1)
 
 print("initializing session ...")
-sess = lib.session.Session("classifier", graph=graph)
+sess = lib.session.Session("models/classifier", graph=graph)
 sess.init()
 
 print("running...")

@@ -75,7 +75,7 @@ def main(source, destination):
         o = tf.concat([pos, size], axis=1)
 
     print("initializing session ...")
-    sess = lib.session.Session("bounding_box", graph=graph)
+    sess = lib.session.Session("models/bounding_box", graph=graph)
     sess.init()
     ii = 0
 

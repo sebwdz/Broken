@@ -105,7 +105,7 @@ with graph.as_default():
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 print("initializing session ...")
-sess = lib.session.Session("bounding_box", graph=graph)
+sess = lib.session.Session("models/bounding_box", graph=graph)
 sess.init()
 ii = 0
 

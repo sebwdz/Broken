@@ -73,7 +73,7 @@ with graph.as_default():
     merged = tf.summary.merge_all()
 
 print("initializing session ...")
-sess = lib.session.Session("classifier", graph=graph)
+sess = lib.session.Session("models/classifier", graph=graph)
 sess.init()
 ii = 0
 

@@ -6,12 +6,13 @@ import numpy as np
 import begin
 import tensorflow as tf
 import lib
-import json
 
 import os
 import os.path
 
 from PIL import Image
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def load_sample(source):

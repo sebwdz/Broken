@@ -19,8 +19,8 @@ def load_directory_test(x):
 def load_train_data(f):
     return lib.data.shuffle(*lib.data.load_many_labeled_directory([("zoom_level_2/normal", (1, 0)),
                                                                    ("zoom_level_2/broken", (0, 1)),
-                                                                   ("generated/zoom_level_2g/normal", (1, 0)),
-                                                                   ("generated/zoom_level_2g/broken", (0, 1)),
+                                                                   ("generated/zoom_level_2/normal", (1, 0)),
+                                                                   ("generated/zoom_level_2/broken", (0, 1)),
                                                                    ("generated/zoom_level_2g/normal", (1, 0)),
                                                                    ("generated/zoom_level_2g/broken", (0, 1)),
                                                                    ], f))

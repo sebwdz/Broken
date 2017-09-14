@@ -80,30 +80,6 @@ with graph.as_default():
     size = lib.layers.fully_connected(o, (200, 2), "size_layer")
     o = tf.concat([pos, size], axis=1)
 
-    with tf.name_scope("cross_entropy"):
-        loss = tf.reduce_sum(tf.pow(o - y, 2)) / (2.0 * tf.cast(tf.shape(x)[0], tf.float32))
-        cross_entropy = loss
-
-    with tf.name_scope("accuracy"):
-        xA, yA = tf.maximum(y[:, 0], o[:, 0]), tf.maximum(y[:, 1], o[:, 1])
-        xB, yB = (tf.minimum(y[:, 0] + tf.maximum(0.0, y[:, 2]), o[:, 0] + tf.maximum(0.0, o[:, 2])),
-                  tf.minimum(y[:, 0] + tf.maximum(y[:, 3], 0.0), o[:, 0] + tf.maximum(0.0, o[:, 3])))
-
-        interArea = (xB - xA) * (yB - yA)
-
-        boxAArea = tf.maximum(y[:, 2], 0.0) * tf.maximum(y[:, 3], 0.0)
-        boxBArea = tf.maximum(o[:, 2], 0.0) * tf.maximum(o[:, 3], 0.0)
-
-        d = tf.maximum(0.0, boxAArea + boxBArea - interArea)
-
-        accuracy_f = tf.where(
-            tf.equal(d, 0.0),
-            tf.zeros_like(interArea), tf.truediv(interArea, d))
-
-        accuracy = tf.reduce_mean(accuracy_f)
-
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
-
 print("initializing session ...")
 sess = lib.session.Session("models/bounding_box", graph=graph)
 sess.init()

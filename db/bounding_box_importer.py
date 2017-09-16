@@ -23,7 +23,7 @@ def main(source):
     conn.commit()
     cur = conn.cursor()
     cur.execute("UPDATE boundingbox SET fk_parent_id = t.id FROM (SELECT id, fk_image_id FROM boundingbox " +
-                "WHERE boundingbox.settings->>'class' = 'rect') as t WHERE boundingbox.settings->>'class' = 'Face' "+
-                "AND boundingbox.fk_image_id = t.fk_image_id")
+                "WHERE boundingbox.settings->>'class' = 'rect') as t WHERE boundingbox.settings->>'class' = 'Face' " +
+                "AND boundingbox.fk_image_id = t.fk_image_id AND boundingbox.fk_parent_id IS NULL")
     conn.commit()
 

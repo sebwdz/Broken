@@ -1,60 +1,22 @@
 #!/usr/bin/python3.5
 
-import scipy.ndimage
-import scipy.misc
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 import tensorflow as tf
 import lib
-import json
-
-from PIL import Image
-
-
-def load_sample():
-    directory = "data/interim/package_2/zoom_level_1/normal/"
-
-    file = directory + "bounding_box.json"
-
-    labels_l = json.load(open(file))
-
-    images, labels, raw_images = [], [], []
-
-    for label in labels_l:
-        filename = label["filename"]
-        box = label["annotations"][0]
-        img = Image.open(directory + filename)
-
-        new_label = (box["x"], box["y"], box["width"], box["height"])
-        img = np.asarray(img)
-        raw_images.append(img)
-        r1, r2 = img.shape[0] / 50.0, img.shape[1] / 50.0
-        img = scipy.misc.imresize(img, (50, 50), interp='bilinear', mode=None)
-        img = img[:, :, 1]
-        new_label = (new_label[0] / r2, new_label[1] / r1, new_label[2] / r2, new_label[3] / r1)
-
-        labels.append(new_label)
-        images.append(img)
-    return np.asarray(images), np.asarray(labels), raw_images
+import pickle
+from os.path import join
 
 
-def load_data():
-    images, labels, raw_images = load_sample()
-    r = np.arange(images.shape[0])
-    return images[r], labels[r], raw_images
+def load_sample(x):
+    data = pickle.load(open(join("data/interim/bounding_box/", x), "rb"))
+    return np.array(data['images']), np.array(data['labels'])
 
 
 print("loading data ...")
-images, labels, raw_images = load_data()
-
-all_images = images
-all_labels = labels
-
-images = [images]
-labels = [labels]
-raw_images = [raw_images]
+test_data = load_sample("test")
 
 print("building graph ...")
 graph = tf.Graph()
@@ -90,27 +52,21 @@ print("running...")
 plt.ion()
 fig, ax = plt.subplots(1)
 
-for i in range(len(images)):
-    batch = (images[ii], labels[ii], raw_images[ii])
-    ii = ii + 1 if ii + 1 < len(images) else 0
-    feed_dict = {x: batch[0], y: batch[1], keep_prob: 1}
-    res = sess.run(o, feed_dict)
+feed_dict = {x: test_data[0], y: test_data[1], keep_prob: 1}
+res = sess.run(o, feed_dict)
 
-    for xx in range(len(res)):
-        ax.clear()
-        ax.imshow(batch[2][xx])
+for xx in range(len(res)):
+    ax.clear()
+    ax.imshow(test_data[0][xx])
 
-        r1, r2 = batch[2][xx].shape[0] / 50.0, batch[2][xx].shape[1] / 50.0
-        x, y, w, h = res[xx][0] * r2, res[xx][1] * r1, res[xx][2] * r2, res[xx][3] * r1
+    rect = patches.Rectangle((res[xx][0],res[xx][1]), res[xx][2], res[xx][3], linewidth=1,
+                             edgecolor='r', facecolor='none')
+    ax.add_patch(rect)
 
-        rect = patches.Rectangle((x, y), w, h, linewidth=1,
-                                 edgecolor='r', facecolor='none')
-        ax.add_patch(rect)
+    x, y, w, h = test_data[1][xx][0], test_data[1][xx][1], test_data[1][xx][2], test_data[1][xx][3]
 
-        x, y, w, h = batch[1][xx][0] * r2, batch[1][xx][1] * r1, batch[1][xx][2] * r2, batch[1][xx][3] * r1
-
-        rect = patches.Rectangle((x, y), w, h, linewidth=1,
-                                 edgecolor='w', facecolor='none')
-        ax.add_patch(rect)
-        plt.draw()
-        plt.pause(2)
+    rect = patches.Rectangle((x, y), w, h, linewidth=1,
+                             edgecolor='w', facecolor='none')
+    ax.add_patch(rect)
+    plt.draw()
+    plt.pause(0.5)

@@ -72,15 +72,14 @@ def main(debug=False):
                 if debug:
                     ax.clear()
                     ax.imshow(tmp_img)
-                    rect = patches.Rectangle((label["x"], label["y"]),
-                                             label["w"], label["h"], linewidth=1,
+                    rect = patches.Rectangle((label["x"], label["y"]), label["w"], label["h"], linewidth=1,
                                              edgecolor='r', facecolor='none')
                     ax.add_patch(rect)
                     plt.draw()
                     plt.pause(0.5)
                 if not debug:
                     data["images"].append(tmp_img)
-                    data["labels"].append(label)
+                    data["labels"].append((label["x"], label["y"], label["w"], label["h"]))
             context = zooms[x]
         if not debug:
             pickle.dump(data, open(join("../data/interim/bounding_box", join(box["folder"], str(box["id"]))), "wb"))

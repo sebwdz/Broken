@@ -6,34 +6,18 @@ import pickle
 import lib
 
 import os.path
+import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-def load_directory_train(x):
-    data = pickle.load(open(os.path.join("data/interim/package_1/bounding_box", x), "rb"))
-    return data['images'], data['labels']
-
-
-def load_directory_test(x):
-    data = pickle.load(open(os.path.join("data/interim/package_2/bounding_box", x), "rb"))
-    return data['images'], data['labels']
-
-
-def load_data(f):
-    files = ["normal_bg", "broken_bg", "normal_lt", "broken_lt", "broken_lt_g", "normal_lt_g"]
-    return lib.data.shuffle(*lib.data.load_many_labeled_directory(files, f))
-
-
-def load_test_data(f):
-    files = ["normal_bg", "broken_bg", "normal_lt", "broken_lt"]
-    return lib.data.shuffle(*lib.data.load_many_labeled_directory(files, f))
+def load_dataset(x):
+    data = pickle.load(open(os.path.join("data/interim/bounding_box/", x), "rb"))
+    return np.array(data['images']), np.array(data['labels'])
 
 print("loading data ...")
-next_batch = lib.data.get_next_batch(*lib.data.batch(*load_data(load_directory_train), 10))
-
-tmp = lib.data.shuffle(*load_data(load_directory_train))
-test_data = lib.data.shuffle(*load_test_data(load_directory_test))
+next_batch = lib.data.get_next_batch(*lib.data.batch(*load_dataset("train"), 10))
+test_data = load_dataset("test")
 
 print("building graph ...")
 graph = tf.Graph()
@@ -95,9 +79,9 @@ sess.init()
 ii = 0
 
 print("running...")
-for i in range(500):
+for i in range(2000):
     batch = next_batch.__next__()
-    if i % 10 == 0:
+    if i % 50 == 0:
         feed_dict = {x: test_data[0], y: test_data[1], keep_prob: 1}
         train_accuracy, cost = sess.test_step(accuracy, cross_entropy, merged, feed_dict, i)
         print('step %d, test accuracy %g, cost %g' % (i, train_accuracy, cost))

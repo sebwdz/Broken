@@ -2,7 +2,7 @@ import tensorflow as tf
 import lib.summaries
 
 
-def convolutional(t_input, dimension, layer_name, summaries=True, stdev=0.001, biais=0.01,
+def convolutional(t_input, dimension, layer_name, summaries=True, stdev=0.01, biais=0.01,
                   strides=(1, 1, 1, 1), padding='SAME', f=tf.nn.relu):
 
     with tf.name_scope(layer_name):
@@ -17,7 +17,7 @@ def convolutional(t_input, dimension, layer_name, summaries=True, stdev=0.001, b
         return f(o + b)
 
 
-def fully_connected(t_input, dimension, layer_name, summaries=True, stddev=0.001, biais=0.01, f=tf.nn.relu):
+def fully_connected(t_input, dimension, layer_name, summaries=True, stddev=0.01, biais=0.01, f=tf.nn.relu):
 
     with tf.name_scope(layer_name):
 

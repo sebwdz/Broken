@@ -19,7 +19,9 @@ def main():
     all_files = list(glob.iglob('data/interim/bounding_box/*/*', recursive=True))
     random.shuffle(all_files)
     test = all_files[:int(0.05 * len(all_files))]
-    train = all_files[:int(0.95 * len(all_files))]
+    train = all_files[int(0.05 * len(all_files)):]
+    print(len(test))
+    print(len(train))
     make_dataset(test, "data/interim/bounding_box/test")
     make_dataset(train, "data/interim/bounding_box/train")
 

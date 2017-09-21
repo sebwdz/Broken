@@ -3,49 +3,31 @@
 import tensorflow as tf
 import os
 
+import pickle
+import numpy as np
 import lib
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-def load_directory_train(x):
-    return lib.data.load_force_labeled(os.path.join("data/interim/package_1/", x[0]), x[1], (60, 60))
-
-
-def load_directory_test(x):
-    return lib.data.load_force_labeled(os.path.join("data/interim/package_2/", x[0]), x[1], (60, 60))
-
-
-def load_train_data(f):
-    return lib.data.shuffle(*lib.data.load_many_labeled_directory([("zoom_level_2/normal", (1, 0)),
-                                                                   ("zoom_level_2/broken", (0, 1)),
-                                                                   ("generated/zoom_level_2/normal", (1, 0)),
-                                                                   ("generated/zoom_level_2/broken", (0, 1)),
-                                                                   ("generated/zoom_level_2g/normal", (1, 0)),
-                                                                   ("generated/zoom_level_2g/broken", (0, 1)),
-                                                                   ], f))
-
-
-def load_test_data(f):
-    return lib.data.shuffle(*lib.data.load_many_labeled_directory([("zoom_level_2/normal", (1, 0)),
-                                                                   ("zoom_level_2/broken", (0, 1))], f))
-
+def load_dataset(x):
+    data = pickle.load(open(os.path.join("data/interim/classifier/", x), "rb"))
+    return np.array(data['images']), np.array(data['labels'])
 
 print("loading data ...")
-next_batch = lib.data.get_next_batch(*lib.data.batch(*load_train_data(load_directory_train), 10))
-
-test_data = lib.data.shuffle(*load_test_data(load_directory_test))
+next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 10))
+test_data = load_dataset("test")
 
 print("building graph ...")
 graph = tf.Graph()
 
 with graph.as_default():
 
-    x = tf.placeholder(tf.float32, shape=(None, 60, 60))
+    x = tf.placeholder(tf.float32, shape=(None, 100, 100))
     y = tf.placeholder(tf.float32, shape=(None, 2,))
     keep_prob = tf.placeholder(tf.float32)
 
-    o = tf.reshape(x, (-1, 60, 60, 1))
+    o = tf.reshape(x, (-1, 100, 100, 1))
     tf.summary.image("images", o, 1)
     o = lib.layers.convolutional(o, (10, 10, 1, 32), "first_layer")
     o = lib.layers.pool(o, k_size=(1, 2, 2, 1), strides=(1, 2, 2, 1))
@@ -53,8 +35,8 @@ with graph.as_default():
     o = lib.layers.pool(o, k_size=(1, 4, 4, 1), strides=(1, 4, 4, 1))
     o = lib.layers.convolutional(o, (5, 5, 64, 128), "third_layer")
     o = lib.layers.pool(o, k_size=(1, 4, 4, 1), strides=(1, 4, 4, 1))
-    o = tf.reshape(o, (-1, 2 * 2 * 128))
-    o = lib.layers.fully_connected(o, (2 * 2 * 128, 200), "fully_connected")
+    o = tf.reshape(o, (-1, 4 * 4 * 128))
+    o = lib.layers.fully_connected(o, (4 * 4 * 128, 200), "fully_connected")
     o = tf.nn.dropout(o, keep_prob)
     o = lib.layers.fully_connected(o, (200, 2), "output_layer", f=tf.nn.softmax)
     lib.summaries.variable_summaries(o)

@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+import scipy.misc
+import scipy.ndimage
+
 import tensorflow as tf
 import pickle
 import os
@@ -13,8 +16,21 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def load_dataset(x):
-    data = pickle.load(open(os.path.join("data/interim/classifier/", x), "rb"))
-    return np.array(data['images']), np.array(data['labels'])
+    data = []
+    labels = []
+    files = ['broken/R1922011', 'broken/dd3366',
+             'broken/piege', 'broken/r_18',
+             'broken/dd3409', 'broken/dd3533',
+             'broken/dd3636', 'broken/R1092017',
+             'normal/dd1382', 'normal/dd524',
+             'normal/dd14', 'normal/dd69',
+             'normal/dd112', 'normal/dd809',
+             'normal/dd725', 'normal/dd719']
+    for file in files:
+        image = scipy.ndimage.imread(os.path.join("data/interim/generated/eq_faces/" + file) + ".jpg", flatten=True)
+        data.append(scipy.misc.imresize(image, (100, 100), interp='bilinear', mode=None))
+        labels.append((0, 1) if "broken" in file else (1, 0))
+    return data, labels
 
 print("loading data ...")
 test_data = load_dataset("test")
@@ -67,6 +83,7 @@ for ii in range(len(test_data)):
         rect = patches.Rectangle((20, 20), batch[0][i].shape[1] - 40, batch[0][i].shape[0] - 40, linewidth=4,
                                  edgecolor='g' if batch[1][i][0] < batch[1][i][1] else 'r', facecolor='none')
 
+        print(res[i], batch[1][i])
 # normal - normal (VN)
         if batch[1][i][0] > batch[1][i][1] and res[i][0] > res[i][1]:
             vn += 1

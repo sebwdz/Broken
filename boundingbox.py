@@ -16,7 +16,7 @@ def load_dataset(x):
     return np.array(data['images']), np.array(data['labels'])
 
 print("loading data ...")
-next_batch = lib.data.get_next_batch(*lib.data.batch(*load_dataset("train"), 10))
+next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 10))
 test_data = load_dataset("test")
 
 print("building graph ...")
@@ -30,7 +30,7 @@ with graph.as_default():
 
     o = tf.reshape(x, (-1, 50, 50, 1))
     tf.summary.image("images", o, 1)
-    o = lib.layers.convolutional(o, (10, 10, 1, 32), "first_layer")
+    o = lib.layers.convolutional(o, (5, 5, 1, 32), "first_layer")
     o = lib.layers.pool(o, k_size=(1, 2, 2, 1), strides=(1, 2, 2, 1))
     o = lib.layers.convolutional(o, (5, 5, 32, 64), "second_layer")
     o = lib.layers.pool(o, k_size=(1, 2, 2, 1), strides=(1, 2, 2, 1))
@@ -79,7 +79,7 @@ sess.init()
 ii = 0
 
 print("running...")
-for i in range(2000):
+for i in range(1000):
     batch = next_batch.__next__()
     if i % 50 == 0:
         feed_dict = {x: test_data[0], y: test_data[1], keep_prob: 1}

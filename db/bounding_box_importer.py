@@ -18,7 +18,8 @@ def main(source):
     for img in bbox:
         img_id = images[img['filename']]
         for box in img['annotations']:
-            batch.append({"fk_image_id": img_id, "settings": json.dumps(box)})
+            if box['class'] == 'Face':
+                batch.append({"fk_image_id": img_id, "settings": json.dumps(box)})
     cur.executemany(query, batch)
     conn.commit()
     cur = conn.cursor()

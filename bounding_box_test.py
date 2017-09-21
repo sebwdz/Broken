@@ -22,14 +22,13 @@ print("building graph ...")
 graph = tf.Graph()
 
 with graph.as_default():
-
     x = tf.placeholder(tf.float32, shape=(None, 50, 50))
     y = tf.placeholder(tf.float32, shape=(None, 4,))
     keep_prob = tf.placeholder(tf.float32)
 
     o = tf.reshape(x, (-1, 50, 50, 1))
     tf.summary.image("images", o, 1)
-    o = lib.layers.convolutional(o, (10, 10, 1, 32), "first_layer")
+    o = lib.layers.convolutional(o, (5, 5, 1, 32), "first_layer")
     o = lib.layers.pool(o, k_size=(1, 2, 2, 1), strides=(1, 2, 2, 1))
     o = lib.layers.convolutional(o, (5, 5, 32, 64), "second_layer")
     o = lib.layers.pool(o, k_size=(1, 2, 2, 1), strides=(1, 2, 2, 1))
@@ -59,7 +58,12 @@ for xx in range(len(res)):
     ax.clear()
     ax.imshow(test_data[0][xx])
 
-    rect = patches.Rectangle((res[xx][0],res[xx][1]), res[xx][2], res[xx][3], linewidth=1,
+    """for i in range(len(res[xx])):
+        res[xx][i] += 5 if i < 2 else 5"""
+
+    print(res[xx])
+    print(test_data[1][xx])
+    rect = patches.Rectangle((res[xx][0], res[xx][1]), res[xx][2], res[xx][3], linewidth=1,
                              edgecolor='r', facecolor='none')
     ax.add_patch(rect)
 
@@ -69,4 +73,4 @@ for xx in range(len(res)):
                              edgecolor='w', facecolor='none')
     ax.add_patch(rect)
     plt.draw()
-    plt.pause(0.5)
+    plt.pause(0.1)

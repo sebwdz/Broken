@@ -26,15 +26,15 @@ def translate_context(box, context):
 
 
 @begin.start
-def main(debug=False):
+def main(debug=None):
     if not os.path.exists("../data/interim/bounding_box"):
         os.makedirs("../data/interim/bounding_box")
         os.makedirs("../data/interim/bounding_box/broken")
         os.makedirs("../data/interim/bounding_box/normal")
 
     query = "SELECT images.filename as filename, images.id as id, images.details->>'ACL' as folder, " \
-            "Z.settings as zoom ,F.settings as face " + \
-            "FROM boundingbox as Z INNER JOIN boundingbox F ON Z.id = F.fk_parent_id " + \
+            "F.settings as face " + \
+            "FROM boundingbox as F " + \
             "INNER JOIN images ON images.id = F.fk_image_id"
 
     conn = psycopg2.connect("dbname='watson' user='sebastien' host='localhost' password='password'")
@@ -49,38 +49,40 @@ def main(debug=False):
     for box in boxes:
         data = {"labels": [], "images": []}
         img = PIL.Image.open("../data/interim/equalized/" + join(box["folder"], box["filename"]))
+        img2 = PIL.Image.open("../data/raw/" + join(box["folder"], "crop", box["filename"]))
+        imgs = [img, img2]
         face = {k[0]: box["face"][k] for k in ["x", "y", "height", "width"]}
-        zoom_l1 = {k[0]: box["zoom"][k] for k in ["x", "y", "height", "width"]}
-        zoom_l2 = {k: (face[k] + zoom_l1[k]) / 2 for k in ["x", "y", "h", "w"]}
-        zooms = [zoom_l1, zoom_l2, face]
-        context = {"x": 0, "y": 0, "w": img.size[0], "h": img.size[1]}
-        for x in range(len(zooms)):
-            cnt = translate_context(zooms[x], context)
-            for t in cnt:
-                tmp_img = img.transform(img.size, PIL.Image.AFFINE, (1, 0, t[0], 0, 1, t[1]))
-                tmp_img = tmp_img.crop((int(context["x"]), int(context["y"]),
-                                        int(context["x"] + context["w"]),
-                                        int(context["y"] + context["h"])))
-                tmp_img = np.asarray(tmp_img)
-                label = {"x": zooms[x]["x"] - context["x"] - t[0],
-                         "y": zooms[x]["y"] - context["y"] - t[1],
-                         "w": zooms[x]["w"], "h": zooms[x]["h"]}
+        face = {**{k: face[k] * 0.7 for k in ["x", "y"]}, **{k: face[k] * 1.4 for k in ["h", "w"]}}
+        zooms = [face]
+        for img in imgs:
+            context = {"x": 0, "y": 0, "w": img.size[0], "h": img.size[1]}
+            for x in range(len(zooms)):
+                cnt = translate_context(zooms[x], context)
+                for t in cnt:
+                    tmp_img = img.transform(img.size, PIL.Image.AFFINE, (1, 0, t[0], 0, 1, t[1]))
+                    tmp_img = tmp_img.crop((int(context["x"]), int(context["y"]),
+                                            int(context["x"] + context["w"]),
+                                            int(context["y"] + context["h"])))
+                    tmp_img = np.asarray(tmp_img)
+                    label = {"x": zooms[x]["x"] - context["x"] - t[0],
+                             "y": zooms[x]["y"] - context["y"] - t[1],
+                             "w": zooms[x]["w"], "h": zooms[x]["h"]}
 
-                r1, r2 = tmp_img.shape[0] / 50.0, tmp_img.shape[1] / 50.0
-                tmp_img = scipy.misc.imresize(tmp_img, (50, 50), interp='bilinear', mode=None)[:, :, 1]
-                label = {k: label[k] / (r1 if k in ["x", "y"] else r2) for k in label.keys()}
-                if debug:
-                    ax.clear()
-                    ax.imshow(tmp_img)
-                    rect = patches.Rectangle((label["x"], label["y"]), label["w"], label["h"], linewidth=1,
-                                             edgecolor='r', facecolor='none')
-                    ax.add_patch(rect)
-                    plt.draw()
-                    plt.pause(0.5)
-                if not debug:
-                    data["images"].append(tmp_img)
-                    data["labels"].append((label["x"], label["y"], label["w"], label["h"]))
-            context = zooms[x]
+                    r1, r2 = tmp_img.shape[0] / 50.0, tmp_img.shape[1] / 50.0
+                    tmp_img = scipy.misc.imresize(tmp_img, (50, 50), interp='bilinear', mode=None)[:, :, 1]
+                    label = {k: label[k] / (r1 if k in ["x", "y"] else r2) for k in label.keys()}
+                    if debug:
+                        ax.clear()
+                        ax.imshow(tmp_img)
+                        rect = patches.Rectangle((label["x"], label["y"]), label["w"], label["h"], linewidth=1,
+                                                 edgecolor='r', facecolor='none')
+                        ax.add_patch(rect)
+                        plt.draw()
+                        plt.pause(0.1)
+                    if not debug:
+                        data["images"].append(tmp_img)
+                        data["labels"].append((label["x"], label["y"], label["w"], label["h"]))
+                context = zooms[x]
         if not debug:
             pickle.dump(data, open(join("../data/interim/bounding_box", join(box["folder"], str(box["id"]))), "wb"))
 

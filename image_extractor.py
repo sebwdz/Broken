@@ -10,10 +10,12 @@ import PIL.Image as Image
 def main(source, destination, bbfile):
     if not os.path.exists(destination):
         os.makedirs(destination)
-    labels = json.load(open(join(source, bbfile)))
+    labels = json.load(open(bbfile))
     for label in labels:
         filename = label["filename"]
         box = label["annotations"][0]
+        if box['class'] != 'Face':
+            box = label["annotations"][1]
         raw_img = Image.open(join(source, filename))
         crop_img = raw_img.crop((int(box["x"]), int(box["y"]),
                                  int(box["width"]) + int(box["x"]), int(box["height"]) + int(box["y"])))

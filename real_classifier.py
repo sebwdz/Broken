@@ -18,14 +18,14 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 def load_dataset(x):
     data = []
     labels = []
-    files = ['broken/R1922011', 'broken/dd3366',
-             'broken/piege', 'broken/r_18',
-             'broken/dd3409', 'broken/dd3533',
-             'broken/dd3636', 'broken/R1092017',
-             'normal/dd1382', 'normal/dd524',
-             'normal/dd14', 'normal/dd69',
-             'normal/dd112', 'normal/dd809',
-             'normal/dd725', 'normal/dd719']
+    files = ['broken/dd3473', 'broken/r_15',
+              'broken/dd3668', 'broken/r_02',
+              'broken/piege 2', 'broken/r_01',
+              'broken/dd3351', 'broken/r2092017b',
+              'normal/dd1382', 'normal/dd524',
+              'normal/dd14', 'normal/dd69',
+              'normal/dd112', 'normal/dd809',
+              'normal/dd725', 'normal/dd719']
     for file in files:
         image = scipy.ndimage.imread(os.path.join("data/interim/generated/eq_faces/" + file) + ".jpg", flatten=True)
         data.append(scipy.misc.imresize(image, (100, 100), interp='bilinear', mode=None))
@@ -78,12 +78,13 @@ for ii in range(len(test_data)):
         ax.clear()
         ax.imshow(batch[0][i])
         rect = patches.Rectangle((5, 5), batch[0][i].shape[1] - 10, batch[0][i].shape[0] - 10, linewidth=2,
-                                 edgecolor='g' if res[i][0] < res[i][1] else 'r', facecolor='none')
+                                 edgecolor='g' if res[i][0] > res[i][1] else 'r', facecolor='none')
         ax.add_patch(rect)
         rect = patches.Rectangle((20, 20), batch[0][i].shape[1] - 40, batch[0][i].shape[0] - 40, linewidth=4,
-                                 edgecolor='g' if batch[1][i][0] < batch[1][i][1] else 'r', facecolor='none')
+                                 edgecolor='g' if batch[1][i][0] > batch[1][i][1] else 'r', facecolor='none')
 
         print(res[i], batch[1][i])
+        print(((res[i][0] - res[i][1]) + 1) / 2)
 # normal - normal (VN)
         if batch[1][i][0] > batch[1][i][1] and res[i][0] > res[i][1]:
             vn += 1

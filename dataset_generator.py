@@ -17,7 +17,8 @@ rsource = "data/interim/generated/faces/"
 filename = ["train", "test"]
 
 directories = ["data/interim/generated/eq_faces", "data/interim/generated/faces",
-               "data/interim/generated/r_faces", "data/interim/generated/req_faces"]
+               "data/interim/generated/r_faces", "data/interim/generated/req_faces",
+               "data/interim/generated/req_faces_av", "data/interim/generated/req_faces_bg"]
 images = []
 labels = []
 

@@ -16,7 +16,7 @@ def load_dataset(x):
     return np.array(data['images']), np.array(data['labels'])
 
 print("loading data ...")
-next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 10))
+next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 20))
 test_data = load_dataset("test")
 
 print("building graph ...")

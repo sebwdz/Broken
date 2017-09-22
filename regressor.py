@@ -15,7 +15,7 @@ def load_dataset(x):
     return np.array(data['images']), np.array(data['labels'])
 
 print("loading data ...")
-next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 20))
+next_batch = lib.data.get_next_batch(*lib.data.batch(*lib.data.shuffle(*load_dataset("train")), 10))
 test_data = load_dataset("test")
 
 print("building graph ...")
@@ -46,8 +46,9 @@ with graph.as_default():
         tf.summary.scalar('cross_entropy', cross_entropy)
 
     with tf.name_scope("accuracy"):
-        correct_prediction = tf.equal(tf.argmax(o, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        accuracy = tf.reduce_sum(tf.pow(o - y, 2)) / (2.0 * tf.cast(tf.shape(x)[0], tf.float32))
+        """correct_prediction = tf.equal(tf.argmax(o, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))"""
         tf.summary.scalar('accuracy', accuracy)
 
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
@@ -55,7 +56,7 @@ with graph.as_default():
     merged = tf.summary.merge_all()
 
 print("initializing session ...")
-sess = lib.session.Session("models/classifier", graph=graph)
+sess = lib.session.Session("models/regresor", grxaph=graph)
 sess.init()
 ii = 0
 

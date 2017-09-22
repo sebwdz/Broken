@@ -17,7 +17,8 @@ def main(source, destination, bbfile):
         if box['class'] != 'Face':
             box = label["annotations"][1]
         raw_img = Image.open(join(source, filename))
-        crop_img = raw_img.crop((int(box["x"]), int(box["y"]),
-                                 int(box["width"]) + int(box["x"]), int(box["height"]) + int(box["y"])))
+        crop_img = raw_img.crop((int(box["x"] * 0.7), int(box["y"] * 0.7),
+                                 int(box["width"] * 1.4) + int(box["x"] * 0.7),
+                                 int(box["height"] * 1.4) + int(box["y"] * 0.7)))
         crop_img.save(join(destination, filename))
 

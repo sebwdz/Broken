@@ -100,6 +100,6 @@ for ii in range(len(test_data)):
 
         ax.add_patch(rect)
         plt.draw()
-        plt.pause(0.5)
+        plt.pause(0.1)
     print("vp:", vp, " vn:", vn, "fp:", fp, "fn:", fn)
     exit(0)

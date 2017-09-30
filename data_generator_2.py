@@ -22,6 +22,9 @@ def main():
     random.shuffle(all_files)
     test = all_files[:int(0.1 * len(all_files))] + all_files2[:int(0.1 * len(all_files))]
     train = all_files[int(0.1 * len(all_files)):] + all_files2[int(0.1 * len(all_files)):]
+    print(len(test))
+    print(len(train))
+    exit(0)
     make_dataset(test, "data/interim/classifier/test")
     make_dataset(train, "data/interim/classifier/train")
 
